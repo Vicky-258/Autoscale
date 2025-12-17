@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
-import joblib
 
 WINDOW_SIZE = 30
 HORIZON = 12
@@ -42,7 +41,7 @@ X, y = create_sliding_windows(
 print("X shape:", X.shape)
 print("y shape:", y.shape)
 
-idx = 200  # any index
+idx = 200  
 
 plt.figure(figsize=(10, 4))
 plt.plot(range(WINDOW_SIZE), X[idx], label="Past (X)")
