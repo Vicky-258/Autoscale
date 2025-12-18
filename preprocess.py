@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
+import joblib
 
 WINDOW_SIZE = 30
 HORIZON = 12
@@ -53,3 +54,10 @@ plt.plot(
 plt.legend()
 plt.title("One Training Sample")
 plt.show()
+
+np.save("data/processed/X.npy", X)
+np.save("data/processed/y.npy", y)
+
+joblib.dump(scaler, "data/processed/scaler.pkl")
+
+
