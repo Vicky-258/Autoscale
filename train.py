@@ -7,16 +7,16 @@ import matplotlib.pyplot as plt
 X = np.load("data/processed/X.npy")
 y = np.load("data/processed/y.npy")
 
-y_single = y[:, 0]        # single-step target
+y_multi = y[:, :12]   # shape: (N, 12)
 X = X[..., np.newaxis]   # (N, 30, 1)
 
 X = torch.tensor(X, dtype=torch.float32)
-y_single = torch.tensor(y_single, dtype=torch.float32)
+y_multi = torch.tensor(y_multi, dtype=torch.float32)
 
 split = int(0.8 * len(X))
 
 X_train, X_val = X[:split], X[split:]
-y_train, y_val = y_single[:split], y_single[split:]
+y_train, y_val = y_multi[:split], y_multi[split:]
 
 train_ds = TensorDataset(X_train, y_train)
 val_ds   = TensorDataset(X_val, y_val)
@@ -32,12 +32,12 @@ class LSTMModel(nn.Module):
             hidden_size=32,
             batch_first=True
         )
-        self.fc = nn.Linear(32, 1)
+        self.fc = nn.Linear(32, 12)
 
     def forward(self, x):
         out, _ = self.lstm(x)          # (batch, 30, 32)
         last = out[:, -1, :]           # last timestep
-        return self.fc(last).squeeze()
+        return self.fc(last)
 
 model = LSTMModel()
 
@@ -78,14 +78,29 @@ for epoch in range(EPOCHS):
 
 model.eval()
 
+idx = 100
+
 with torch.no_grad():
-    preds = model(X_val[:200]).numpy()
+    pred = model(X_val[idx:idx+1]).squeeze().numpy()
 
-actual = y_val[:200].numpy()
+true = y_val[idx].numpy()
 
-plt.figure(figsize=(10, 4))
-plt.plot(actual, label="Actual")
-plt.plot(preds, label="Predicted")
+plt.figure(figsize=(8, 4))
+plt.plot(range(12), true, marker="o", label="True")
+plt.plot(range(12), pred, marker="x", label="Predicted")
 plt.legend()
-plt.title("Single-step Prediction (Validation)")
+plt.title("12-Step Forecast")
 plt.show()
+
+model.eval()
+with torch.no_grad():
+    preds = model(X_val)
+
+errors = (preds - y_val) ** 2
+mse_per_horizon = errors.mean(dim=0)
+overall_mse = errors.mean()
+
+print("Overall MSE:", overall_mse.item())
+for i, mse in enumerate(mse_per_horizon):
+    print(f"t+{i+1}: MSE = {mse.item():.4f}")
+
