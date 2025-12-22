@@ -3,6 +3,8 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
 import matplotlib.pyplot as plt
+from GRU import GRUModel
+from transformerModel import TransformerModel
 
 X = np.load("data/processed/X.npy")
 y = np.load("data/processed/y.npy")
@@ -24,22 +26,9 @@ val_ds   = TensorDataset(X_val, y_val)
 train_loader = DataLoader(train_ds, batch_size=32, shuffle=True)
 val_loader   = DataLoader(val_ds, batch_size=32)
 
-class LSTMModel(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.lstm = nn.LSTM(
-            input_size=1,
-            hidden_size=32,
-            batch_first=True
-        )
-        self.fc = nn.Linear(32, 12)
 
-    def forward(self, x):
-        out, _ = self.lstm(x)          # (batch, 30, 32)
-        last = out[:, -1, :]           # last timestep
-        return self.fc(last)
 
-model = LSTMModel()
+model = TransformerModel()
 
 criterion = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
