@@ -3,18 +3,24 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
 import matplotlib.pyplot as plt
-from GRU import GRUModel
-from transformerModel import TransformerModel
 
+from predictor.gru_model import GRUModel
+
+# ----------------------------
+# Load data
+# ----------------------------
 X = np.load("data/processed/X.npy")
 y = np.load("data/processed/y.npy")
 
-y_multi = y[:, :12]   # shape: (N, 12)
-X = X[..., np.newaxis]   # (N, 30, 1)
+y_multi = y[:, :12]          # (N, 12)
+X = X[..., np.newaxis]       # (N, 30, 1)
 
 X = torch.tensor(X, dtype=torch.float32)
 y_multi = torch.tensor(y_multi, dtype=torch.float32)
 
+# ----------------------------
+# Train / Val split
+# ----------------------------
 split = int(0.8 * len(X))
 
 X_train, X_val = X[:split], X[split:]
@@ -26,15 +32,19 @@ val_ds   = TensorDataset(X_val, y_val)
 train_loader = DataLoader(train_ds, batch_size=32, shuffle=True)
 val_loader   = DataLoader(val_ds, batch_size=32)
 
-
-
-model = TransformerModel()
+# ----------------------------
+# Model
+# ----------------------------
+model = GRUModel()
 
 criterion = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 EPOCHS = 15
 
+# ----------------------------
+# Training loop
+# ----------------------------
 for epoch in range(EPOCHS):
     model.train()
     train_loss = 0.0
@@ -65,8 +75,17 @@ for epoch in range(EPOCHS):
         f"Val MSE: {val_loss:.4f}"
     )
 
-model.eval()
+# ----------------------------
+# Save model (FREEZE POINT)
+# ----------------------------
+model_path = "predictor/weights/gru_v1.pt"
+torch.save(model.state_dict(), model_path)
+print(f"\n✅ Model saved to {model_path}")
 
+# ----------------------------
+# Qualitative check (plot)
+# ----------------------------
+model.eval()
 idx = 100
 
 with torch.no_grad():
@@ -78,10 +97,12 @@ plt.figure(figsize=(8, 4))
 plt.plot(range(12), true, marker="o", label="True")
 plt.plot(range(12), pred, marker="x", label="Predicted")
 plt.legend()
-plt.title("12-Step Forecast")
+plt.title("GRU — 12-Step Forecast")
 plt.show()
 
-model.eval()
+# ----------------------------
+# Quantitative evaluation
+# ----------------------------
 with torch.no_grad():
     preds = model(X_val)
 
@@ -89,7 +110,6 @@ errors = (preds - y_val) ** 2
 mse_per_horizon = errors.mean(dim=0)
 overall_mse = errors.mean()
 
-print("Overall MSE:", overall_mse.item())
+print("\nOverall MSE:", overall_mse.item())
 for i, mse in enumerate(mse_per_horizon):
     print(f"t+{i+1}: MSE = {mse.item():.4f}")
-
