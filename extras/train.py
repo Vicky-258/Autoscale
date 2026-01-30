@@ -4,7 +4,7 @@ from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
 import matplotlib.pyplot as plt
 
-from predictor.gru_model import GRUModel
+from predictor.models.gru_model import GRUModel
 
 # ----------------------------
 # Load data

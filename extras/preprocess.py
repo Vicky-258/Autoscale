@@ -9,6 +9,10 @@ TRAIN_SPLIT = 0.8
 
 rps = np.load("data/raw/rps_raw.npy")
 
+import os
+
+os.makedirs("data/processed", exist_ok=True)
+
 print("Total points:", len(rps))
 print("Min / Max:", rps.min(), rps.max())
 

@@ -1,6 +1,6 @@
 import torch
-from predictor.gru_model import GRUModel
-from predictor.gru_predictor import GRUPredictor
+from predictor.models.gru_model import GRUModel
+from predictor.predictor import GRUPredictor
 
 model = GRUModel()
 model.load_state_dict(torch.load("predictor/weights/gru_v1.pt"))

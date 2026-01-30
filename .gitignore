@@ -1,12 +1,78 @@
-# Python-generated files
+# ================================
+# Python
+# ================================
 __pycache__/
-*.py[oc]
-build/
-dist/
-wheels/
-*.egg-info
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
 # Virtual environments
-.venv
+.venv/
+venv/
+env/
 
-data/
+# ================================
+# OS / Editor
+# ================================
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# ================================
+# Logs & temp
+# ================================
+*.log
+*.tmp
+*.bak
+
+# ================================
+# Data (ML artifacts)
+# ================================
+# Raw data should usually NOT be versioned
+data/raw/
+
+# Processed data & model artifacts
+data/processed/
+*.npy
+*.pkl
+*.pt
+*.ckpt
+
+# ================================
+# Model weights & checkpoints
+# ================================
+predictor/weights/
+extras/**/weights/
+
+# ================================
+# Experiment outputs
+# ================================
+runs/
+wandb/
+mlruns/
+tensorboard/
+
+# ================================
+# Local config / secrets
+# ================================
+.env
+.env.*
+secrets.yaml
+config.local.yml
+
+# ================================
+# UV / package manager
+# ================================
+.uv/
+uv-cache/
+
+
+uv.lock
