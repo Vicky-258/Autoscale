@@ -1,0 +1,9 @@
+# burst_detector/config.py
+
+WINDOW_SIZE = 20
+
+BURST_RUN_RATIO = 0.3
+DRIFT_RUN_RATIO = 0.3
+
+BURST_PERSISTENCE = 3
+RECOVERY_TIME = 3
