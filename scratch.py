@@ -1,70 +1,33 @@
-TEST_CASES = {
-    "borderline_flicker": [
-        "NOISE", "NOISE", "DRIFT", "NOISE", "DRIFT", "NOISE"
-    ],
+import pandas as pd
+import matplotlib.pyplot as plt
+from performance.model import PerformanceModel
+import numpy as np
 
-    "short_burst": [
-        "BURST", "BURST", "NOISE", "STABLE"
-    ],
+# Load SVR dataset
+df = pd.read_csv("svr_dataset.csv")
 
-    "noisy_but_stable": [
-        "NOISE", "NOISE", "DRIFT", "NOISE", "NOISE", "DRIFT"
-    ],
+total_rps = df["total_rps"].values
+replicas = df["replicas"].values
+y_actual = df["p95_latency_ms"].values
 
-    "slow_ramp_incident": [
-        "NOISE", "DRIFT", "BURST", "BURST", "BURST"
-    ],
+perf_model = PerformanceModel()
 
-    "worst_case_flap_attempt": [
-        "BURST", "NOISE", "BURST", "NOISE", "BURST", "NOISE"
-    ]
-}
+y_pred = []
+for rps, rep in zip(total_rps, replicas):
+    pred = perf_model.predict(rps, int(rep))
+    y_pred.append(pred)
 
-from temporal.classifier import BurstClassifier
+y_pred = np.array(y_pred)
 
-def run_stress_test(name, pattern_sequence):
-    print(f"\n=== Day 6 Test: {name} ===")
+plt.figure(figsize=(6,6))
+plt.scatter(y_actual, y_pred, alpha=0.7)
 
-    classifier = BurstClassifier(
-        burst_persistence=3,
-        recovery_time=3
-    )
+min_v = min(y_actual.min(), y_pred.min())
+max_v = max(y_actual.max(), y_pred.max())
+plt.plot([min_v, max_v], [min_v, max_v], linestyle="--")
 
-    burst_triggered = False
-
-    for t, pattern in enumerate(pattern_sequence):
-        state, explanation = classifier.update(pattern)
-
-        if state == "BURST":
-            burst_triggered = True
-
-        print(
-            f"t={t:02d} | pattern={pattern:<7} "
-            f"→ state={state:<16} | {explanation}"
-        )
-
-    return burst_triggered
-
-EXPECTED = {
-    "borderline_flicker": False,     # must NOT burst
-    "short_burst": False,            # must NOT burst
-    "noisy_but_stable": False,       # must NOT burst
-    "slow_ramp_incident": True,      # SHOULD burst
-    "worst_case_flap_attempt": False # must NOT burst
-}
-
-def run_all_tests():
-    print("\n=== DAY 6 STRESS TEST SUMMARY ===")
-
-    for name, sequence in TEST_CASES.items():
-        burst_seen = run_stress_test(name, sequence)
-        expected = EXPECTED[name]
-
-        verdict = "PASS" if burst_seen == expected else "FAIL"
-
-        print(
-            f"\nResult: {name} → {verdict} "
-            f"(burst_seen={burst_seen}, expected={expected})"
-        )
-
-run_all_tests()
+plt.xlabel("Actual p95 Latency (ms)")
+plt.ylabel("Predicted p95 Latency (ms)")
+plt.title("Day 5 — SVR Predicted vs Actual (Production Path)")
+plt.grid(True)
+plt.show()

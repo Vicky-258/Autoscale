@@ -1,5 +1,5 @@
 """
-Day 4 Invariants:
+Invariants:
 
 1. Pattern classification is temporal, not pointwise.
 2. Exactly ONE pattern is active per window.
