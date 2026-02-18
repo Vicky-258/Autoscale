@@ -1,9 +1,10 @@
 import math
 from dataclasses import dataclass
+from datetime import datetime
 
 
 # ======================
-# Invariants (Day 1 Contract)
+# Invariants
 # ======================
 
 MIN_REPLICAS = 2
@@ -16,11 +17,53 @@ SCALE_UP_COOLDOWN = 30        # seconds
 SCALE_DOWN_COOLDOWN = 120     # seconds
 
 CAPACITY_PER_POD = 100
-MAX_BURST_BOOST = 1.0  # cap burst multiplier addition (100% max boost)
+MAX_BURST_BOOST = 1.0  # max 100% additional burst boost
 
 
 # ======================
-# Pure Decision Function
+# Scaling State
+# ======================
+
+@dataclass
+class ScalingState:
+    last_scale_time: datetime | None = None
+    last_scale_direction: str | None = None  # "up" or "down"
+
+
+# ======================
+# Internal Helpers
+# ======================
+
+def _apply_bounds(recommended: int) -> int:
+    return max(MIN_REPLICAS, min(MAX_REPLICAS, recommended))
+
+
+def _apply_step_limits(current: int, recommended: int) -> tuple[int, str | None]:
+    if recommended > current:
+        candidate = min(recommended, current + MAX_SCALE_UP_STEP)
+        return candidate, "up"
+
+    elif recommended < current:
+        candidate = max(recommended, current - MAX_SCALE_DOWN_STEP)
+        return candidate, "down"
+
+    return current, None
+
+
+def _cooldown_active(state: ScalingState, direction: str, now: datetime) -> bool:
+    if state.last_scale_time is None:
+        return False
+
+    elapsed = (now - state.last_scale_time).total_seconds()
+
+    if direction == "up":
+        return elapsed < SCALE_UP_COOLDOWN
+    else:
+        return elapsed < SCALE_DOWN_COOLDOWN
+
+
+# ======================
+# Public Decision Function
 # ======================
 
 def decide_replicas(
@@ -28,8 +71,8 @@ def decide_replicas(
     current_replicas: int,
     is_bursting: bool,
     burst_intensity: float,
-    current_time: float,
-    last_scale_time: float,
+    state: ScalingState,
+    now: datetime,
 ) -> int:
     """
     Deterministic scaling policy.
@@ -38,52 +81,41 @@ def decide_replicas(
     """
 
     # ----------------------
-    # 1️⃣ Base Recommendation
+    # Base Recommendation
     # ----------------------
     recommended = math.ceil(predicted_rps / CAPACITY_PER_POD)
 
     # ----------------------
-    # 2️⃣ Burst Adjustment
+    # Burst Adjustment
     # ----------------------
     if is_bursting:
         boost = min(burst_intensity, MAX_BURST_BOOST)
         recommended = math.ceil(recommended * (1 + boost))
 
     # ----------------------
-    # 3️⃣ Apply Hard Bounds
+    # Apply Hard Bounds
     # ----------------------
-    recommended = max(MIN_REPLICAS, min(MAX_REPLICAS, recommended))
+    recommended = _apply_bounds(recommended)
 
     # ----------------------
-    # 4️⃣ Apply Step Limits
+    # Apply Step Limits
     # ----------------------
-    if recommended > current_replicas:
-        candidate = min(
-            recommended,
-            current_replicas + MAX_SCALE_UP_STEP
-        )
-        scaling_direction = "up"
+    candidate, direction = _apply_step_limits(current_replicas, recommended)
 
-    elif recommended < current_replicas:
-        candidate = max(
-            recommended,
-            current_replicas - MAX_SCALE_DOWN_STEP
-        )
-        scaling_direction = "down"
-
-    else:
+    if direction is None:
         return current_replicas  # no change
 
     # ----------------------
-    # 5️⃣ Apply Cooldown
+    # Apply Cooldown
     # ----------------------
-    time_since_last = current_time - last_scale_time
+    if _cooldown_active(state, direction, now):
+        return current_replicas
 
-    if scaling_direction == "up":
-        if time_since_last < SCALE_UP_COOLDOWN:
-            return current_replicas
-    else:
-        if time_since_last < SCALE_DOWN_COOLDOWN:
-            return current_replicas
+    # ----------------------
+    # Commit Scaling Event
+    # ----------------------
+    if candidate != current_replicas:
+        state.last_scale_time = now
+        state.last_scale_direction = direction
 
     return candidate

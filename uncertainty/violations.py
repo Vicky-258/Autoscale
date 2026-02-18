@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import matplotlib.pyplot as plt
 
+from config.settings import DEVICE, MODEL_PATH, SCALER_PATH
 from predictor.models.gru_model import GRUModel
 from predictor.predictor import GRUPredictor
 
@@ -30,10 +31,10 @@ y_val = y[split:]
 # Load model + predictor
 # -------------------------
 model = GRUModel()
-model.load_state_dict(torch.load("predictor/weights/gru_v1.pt"))
+model.load_state_dict(torch.load(MODEL_PATH))
 model.eval()
 
-predictor = GRUPredictor(model)
+predictor = GRUPredictor(model, scaler_path=SCALER_PATH, device=DEVICE)
 
 X_val_t = torch.tensor(X_val, dtype=torch.float32).unsqueeze(-1)
 
