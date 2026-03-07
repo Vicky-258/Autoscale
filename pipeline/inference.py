@@ -1,7 +1,7 @@
 import torch
-from predictor.models.gru_model import GRUModel
+from predictor.gru_model import GRUModel
 from predictor.predictor import GRUPredictor
-from burst_detector.detector import BurstDetector
+from burst_detection.detector import BurstDetector
 
 model = GRUModel()
 model.load_state_dict(torch.load("predictor/weights/gru_v1.pt"))

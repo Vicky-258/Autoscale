@@ -48,6 +48,3 @@ def classify_pattern(freq, max_run, run_count, window_size):
 
     # Everything else
     return Pattern.NOISE
-
-
-

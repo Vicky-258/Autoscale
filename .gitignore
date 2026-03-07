@@ -74,5 +74,12 @@ config.local.yml
 .uv/
 uv-cache/
 
-
-uv.lock
+# ================================
+# Runtime States & Leftover Scripts
+# ================================
+scaling_state.json
+svr_dataset.csv
+calibrate.py
+run_dataset_logger.py
+sim/*.png
+!sim/report.png

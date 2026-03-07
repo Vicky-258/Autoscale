@@ -1,35 +1,37 @@
-# burst_detector/detector.py
-
-from burst_detector.config import *
+from config.settings import BURST_WINDOW_SIZE, BURST_PERSISTENCE, RECOVERY_TIME
 from uncertainty.violations import interval_violation
-from temporal.window import SlidingWindow
-from temporal.counters import (
+from burst_detection.window import SlidingWindow
+from burst_detection.counters import (
     violation_frequency,
     max_run_length,
     run_count,
 )
-from temporal.patterns import classify_pattern
-from temporal.classifier import BurstClassifier
+from burst_detection.patterns import classify_pattern
+from burst_detection.classifier import BurstClassifier
+from burst_detection.states import BurstState
 
 
 class BurstDetector:
     """
     Inference-only burst detector.
-    No training dependencies.
     """
 
     def __init__(self):
-        self.window = SlidingWindow(WINDOW_SIZE)
+        self.window = SlidingWindow(BURST_WINDOW_SIZE)
         self.classifier = BurstClassifier(
             burst_persistence=BURST_PERSISTENCE,
             recovery_time=RECOVERY_TIME
         )
-        self.state = "NORMAL"
+        self.state = BurstState.NORMAL
 
-    def update(self, actual, lower, upper):
+    def update(self, actual, lower, upper, is_valid=True):
         """
         Update detector with latest observation.
         """
+        if not is_valid:
+            # Model is returning invalid/fallback bounds. 
+            # Skip updating the window to prevent false decay.
+            return self.state, "Detector paused due to invalid prediction bounds."
 
         v = interval_violation(actual, lower, upper)
         self.window.add(v)
@@ -44,7 +46,7 @@ class BurstDetector:
             freq=freq,
             max_run=max_run,
             run_count=runs,
-            window_size=len(window)
+            window_size=self.window.size
         )
 
         self.state, explanation = self.classifier.update(pattern)

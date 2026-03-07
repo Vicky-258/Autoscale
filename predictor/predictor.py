@@ -10,7 +10,7 @@ class GRUPredictor:
         self.device = device
         self.scaler = joblib.load(scaler_path)
 
-    def predict_next_12(self, x):
+    def predict_next_12(self, x: torch.Tensor) -> torch.Tensor:
         """
         x: Tensor of shape (1, 30, 1) — normalized
         returns: Tensor of shape (12,) — RAW RPS
@@ -23,6 +23,6 @@ class GRUPredictor:
         # Inverse transform to raw RPS
         preds_raw = self.scaler.inverse_transform(
             preds_norm.reshape(-1, 1)
-        ).flatten()
+        ).reshape(x.shape[0], -1)
 
         return torch.tensor(preds_raw)
