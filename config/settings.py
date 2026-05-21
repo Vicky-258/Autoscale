@@ -51,7 +51,7 @@ RECOVERY_TIME = 3
 # Autoscaler Settings
 # =========================
 
-DEPLOYMENT_NAME = "Autoscaler"
+DEPLOYMENT_NAME = "autoscaler"
 LOOP_INTERVAL = 30
 
 MIN_REPLICAS = 2

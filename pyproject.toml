@@ -15,4 +15,5 @@ dependencies = [
     "starlette>=0.52.1",
     "torch>=2.9.1",
     "uvicorn>=0.40.0",
+    "websockets>=16.0",
 ]

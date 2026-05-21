@@ -33,12 +33,14 @@ logger.info(f"Loaded calibrated error bound (t+1): ±{ERROR_BOUND:.2f} RPS")
 # Utilities (Replace Later)
 # =========================
 
+from sim.traffic import TrafficGenerator
+_traffic_gen = TrafficGenerator()
+
 def get_latest_rps():
     """
     Replace with real metric ingestion.
     """
-    import random
-    return random.uniform(200, 800)
+    return _traffic_gen.get_next()
 
 
 def build_input_tensor():
@@ -46,7 +48,7 @@ def build_input_tensor():
     Replace with real sliding window of last 30 RPS values.
     Shape: (1, 30, 1)
     """
-    return torch.randn(1, 30, 1)
+    return _traffic_gen.get_tensor()
 
 
 # =========================

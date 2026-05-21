@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autoscale | Real-Time Live Dashboard</title>
+    <!-- Use Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="glow-bg"></div>
+    <div class="glow-bg bg-2"></div>
+    
+    <div class="container">
+        <header class="glass-panel">
+            <div class="logo">
+                <div class="logo-icon"></div>
+                <h1>Autoscale <span class="badge version">v1.0 Live</span></h1>
+            </div>
+            <div class="header-status">
+                <div class="status-indicator">
+                    <div class="pulse-dot"></div>
+                    <span>System Online</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="dashboard">
+            <div class="stats-row">
+                <div class="stat-card glass-panel">
+                    <h3>Actual RPS</h3>
+                    <div class="value" id="val-actual-rps">0</div>
+                    <div class="trend" id="trend-rps">Waiting for data...</div>
+                </div>
+                <div class="stat-card glass-panel">
+                    <h3>Predicted RPS <span class="dim">(t+12)</span></h3>
+                    <div class="value text-gradient-warning" id="val-pred-rps">0</div>
+                    <div class="trend text-warning" id="trend-bounds">±0.0 Bounds</div>
+                </div>
+                <div class="stat-card glass-panel" id="card-state">
+                    <h3>System State</h3>
+                    <div class="value state-badge" id="val-state">NORMAL</div>
+                    <div class="trend" id="trend-burst">No active bursts</div>
+                </div>
+                <div class="stat-card glass-panel" id="card-replicas">
+                    <h3>Current Replicas</h3>
+                    <div class="value text-gradient-primary" id="val-replicas">0</div>
+                    <div class="trend" id="trend-desired">Desired: 0</div>
+                </div>
+            </div>
+
+            <div class="charts-row">
+                <div class="chart-container glass-panel">
+                    <div class="chart-header">
+                        <h2>Traffic Forecast vs Reality</h2>
+                        <div class="chart-legend">
+                            <span class="legend-item"><span class="dot actual"></span>Actual</span>
+                            <span class="legend-item"><span class="dot predicted"></span>Predicted</span>
+                            <span class="legend-item"><span class="dot bounds"></span>Confidence Interval</span>
+                        </div>
+                    </div>
+                    <div class="canvas-wrapper">
+                        <canvas id="trafficChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container glass-panel">
+                    <div class="chart-header">
+                        <h2>Deterministic Scaling Policy</h2>
+                        <div class="chart-legend">
+                            <span class="legend-item"><span class="dot replica"></span>Replicas</span>
+                        </div>
+                    </div>
+                    <div class="canvas-wrapper">
+                        <canvas id="replicaChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer class="glass-panel">
+            <p>Demo running with fast-forwarded simulation (0.5s logical tick). Live connection established.</p>
+        </footer>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

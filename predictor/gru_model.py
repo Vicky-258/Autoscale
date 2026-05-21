@@ -11,6 +11,6 @@ class GRUModel(nn.Module):
         self.fc = nn.Linear(32, 12)
 
     def forward(self, x):
-        out, _ = self.gru(x)       # (batch, 30, 32)
-        last = out[:, -1, :]       # last timestep
+        out, _ = self.gru(x)       
+        last = out[:, -1, :]       
         return self.fc(last)
