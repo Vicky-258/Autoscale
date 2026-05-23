@@ -40,7 +40,6 @@ Because the logic bridging the probabilistic ML model to the hard-coded Kubernet
 * `docs/burst_detection.md` - How the error bounds, sliding windows, and anomaly state machine works.
 * `docs/scaling_policy.md` - The exact math behind the hard limits, step-caps, and cooldown bypasses.
 * `docs/simulation.md` - How the synthetic time-traveling testing environment works.
-* `docs/audit_findings.md` - A report on the specific logical edge-cases and bugs encountered and fixed during development.
 
 ## Evaluating the System (Running the Simulator)
 Testing time-based scaling logic against an ML model is notoriously hard to do in real-time. To make iterating on this easy, Autoscale includes a fast-forwardable simulation engine.
