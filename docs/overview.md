@@ -35,6 +35,14 @@ graph TD;
 - `sim/` - Artificial time progression, Mock clusters, and Report generators.
 - `uncertainty/` - Static logic to compute residual boundaries.
 
+## Detailed Documentation
+
+To understand the specific mechanics of each part of the system, read through these documents in order:
+1. **[Prediction & Fail-safes](prediction.md)**: Deep dive into the PyTorch GRU forecasting model, data requirements, and how we handle model instability or `NaN` panics.
+2. **[Burst Detection](burst_detection.md)**: Details on the error bounds (confidence intervals), sliding window counters, and the anomaly state machine that intercepts traffic spikes.
+3. **[Scaling Policy](scaling_policy.md)**: The rules engine that transforms AI predictions and burst states into deterministic, rate-limited Kubernetes API calls.
+4. **[Simulation Environment](simulation.md)**: Instructions on how to use the fast-forwardable synthetic testing environment to validate the system against simulated traffic waves.
+
 ## 🚀 Looking Ahead: Autoscale v1.5
 
 The next major release aims to move beyond unidimensional forecasting by integrating deep hardware metrics and latency protections. Check out the formal strategies in the [v1.5 Roadmap](v1.5_roadmap.md).
